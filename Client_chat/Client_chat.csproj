@@ -32,8 +32,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="SimpleChatClient">
+      <HintPath>.\SimpleChatClient.dll</HintPath>
+    </Reference>
+    <Reference Include="SimpleChatFrameManager">
+      <HintPath>.\SimpleChatFrameManager.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Services.Client" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,14 +52,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Form1.cs">
+    <Compile Include="Dao\ChatConnec.cs" />
+    <Compile Include="Dao\DBConnection.cs" />
+    <Compile Include="Dao\Event.cs" />
+    <Compile Include="Dao\EventManager.cs" />
+    <Compile Include="Dao\group.cs" />
+    <Compile Include="Dao\GroupManager.cs" />
+    <Compile Include="Dao\UserManager.cs" />
+    <Compile Include="Dao\users.cs" />
+    <Compile Include="Dao\DBManager.cs" />
+    <Compile Include="Chat.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="Chat.Designer.cs">
+      <DependentUpon>Chat.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DGDB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DGDB.Designer.cs">
+      <DependentUpon>DGDB.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Chat.resx">
+      <DependentUpon>Chat.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DGDB.resx">
+      <DependentUpon>DGDB.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -75,5 +103,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
