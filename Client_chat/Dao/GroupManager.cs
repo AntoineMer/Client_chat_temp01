@@ -9,7 +9,7 @@ namespace Client_chat.Dao
 {
     class GroupManager : DBManager
     {
-        protected List<group> data;
+        protected List<Group> data;
         public GroupManager()
         {
 

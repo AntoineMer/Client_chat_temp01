@@ -7,9 +7,21 @@ using System.Data;
 
 namespace Client_chat.Dao
 {
+
+
     class UserManager : DBManager
     {
-        protected List<users> data;
+
+        private List<User> data;
+
+        public List<User> Data { get => data; set => data = value; }
+
+        public UserManager()
+        {
+            data = new List<User>();
+        }
+
+
         protected override object Map(IDataRecord _record)
         {
             return null;

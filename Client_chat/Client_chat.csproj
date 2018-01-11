@@ -56,10 +56,10 @@
     <Compile Include="Dao\DBConnection.cs" />
     <Compile Include="Dao\Event.cs" />
     <Compile Include="Dao\EventManager.cs" />
-    <Compile Include="Dao\group.cs" />
+    <Compile Include="Dao\Group.cs" />
     <Compile Include="Dao\GroupManager.cs" />
     <Compile Include="Dao\UserManager.cs" />
-    <Compile Include="Dao\users.cs" />
+    <Compile Include="Dao\User.cs" />
     <Compile Include="Dao\DBManager.cs" />
     <Compile Include="Chat.cs">
       <SubType>Form</SubType>

@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Client_chat.Dao
 {
-    class group
+    class Group
     {
         int group_id;
         byte group_level;
         string group_name;
 
-        public group()
+        public Group()
         {
 
         }
