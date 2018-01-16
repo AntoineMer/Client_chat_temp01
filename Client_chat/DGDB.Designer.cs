@@ -66,6 +66,7 @@
             this.textBoxPass.PasswordChar = '*';
             this.textBoxPass.Size = new System.Drawing.Size(100, 20);
             this.textBoxPass.TabIndex = 2;
+            this.textBoxPass.UseSystemPasswordChar = true;
             // 
             // textBoxMail
             // 
@@ -129,6 +130,7 @@
             // 
             // timer1
             // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // DataBase
             // 

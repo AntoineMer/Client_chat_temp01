@@ -29,7 +29,7 @@ namespace Client_chat.Dao
 
                 return sb.ToString();
             }
-
+        
             #endregion
 
             #region PROPERTIES

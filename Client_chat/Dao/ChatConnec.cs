@@ -9,22 +9,50 @@ using System.Net;
 
 namespace Client_chat.Dao
 {
-      class ChatConnec
+    class ChatConnec
     {
-        public static byte[] Connection()
+        byte[] frame;
+        public bool Connection()
         {
+            Client.Init(600, 256);
+            IPAddress iP = IPAddress.Parse(Properties.Settings.Default.ip);
+            Client.EstablishConnection(iP, int.Parse(Properties.Settings.Default.port));
+            frame = FrameManager.WrapFrame100(Properties.Settings.Default.login, User.Password_Hash(Properties.Settings.Default.passwd));
+            if (Client.SendFrame(frame))
+                return true;
+            else return false;
+            
+        }
 
-                Client.Init(600, 256);
-                IPAddress iP = IPAddress.Parse("192.168.221.171");
-                Client.EstablishConnection(iP, 9009);
-                byte[] frame = FrameManager.WrapFrame100("Antoine", "vamvam");
-                return frame;
-       }
-        public static byte[] GetFrame()
+        //public bool verif (byte[] _connection)
+        //{
+        //    if (Client.SendFrame(_connection))
+        //        return true;
+
+        //    else
+        //        return false;
+        //}
+        public void GetMessage(byte[] _frame, out string _moment, out string _time, out string _pseudo, out string _message)
         {
-            byte[] frame;
-            Client.GetFrame(out frame);
-            return frame;
+            FrameManager.UnwrapFrame10(_frame, out string moment, out string time, out string pseudo, out string message);
+            _moment = moment;
+            _time = time;
+            _pseudo = pseudo;
+            _message = message;
+            
+
+        }
+
+        public void Send(string _message)
+        {
+            byte[] frame = FrameManager.WrapFrame110(_message);
+            Client.SendFrame(frame);
+        }
+        public Dictionary<string, byte> GetUsers(byte[] _frame)
+        {
+                Dictionary<string, byte> users = new Dictionary<string, byte>();
+                FrameManager.UnwrapFrame3(_frame, out users);
+                return users;
         }
     }
 }

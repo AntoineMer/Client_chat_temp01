@@ -13,15 +13,13 @@ using SimpleChatFrameManager;
 using System.Net;
 using Client_chat.Dao;
 
-
 namespace Client_chat
 {
     public partial class Chat_Equipe : Form
     {
-        string pseudo, message, moment, time;
-        string a;
-        Dao.DBConnection db;
-        bool verif;
+        ChatConnec chatConnec;
+        DBConnection db;
+        string moment, time, pseudo, message;
         public Chat_Equipe()
         {
             InitializeComponent();
@@ -35,12 +33,14 @@ namespace Client_chat
             labelConnect.ForeColor = Color.Red;
             label1.Text = ("Etat DB : Déconnecté");
             label1.ForeColor = Color.Red;
+            chatConnec = new ChatConnec();
+
+
         }
 
         private void buttonSender_Click(object sender, EventArgs e)
         {
-            byte[] frame2 = FrameManager.WrapFrame110(textBox1.Text);
-            Client.SendFrame(frame2);
+            chatConnec.Send(textBox1.Text);
             if (textBox1.Text == @"/users")
             {
                 DataBase form2 = new DataBase();
@@ -49,96 +49,120 @@ namespace Client_chat
             textBox1.Text = string.Empty;
         }
 
-        private void labelConnect_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-        }
-
         private void buttonDeco_Click(object sender, EventArgs e)
         {
-            if (
-                (db.TestCon())
-                //&& (Client.connectionState)
-                )
+            try
             {
-                db.Close();
-                // Client.CloseConnection();
-
-
+                db.Connection.Close();
+              //  Client.CloseConnection();
+                
+            }
+            catch(Exception _e)
+            {
+                MessageBox.Show("Déconnexion impossible " + _e.Message);
             }
         }
 
         private void buttonConnec_Click(object sender, EventArgs e)
         {
+            Properties.Settings.Default.ip = textBoxIP.Text;                    //Connexion Chat
+            Properties.Settings.Default.login = textBoxLogin.Text;
+            Properties.Settings.Default.passwd = User.Password_Hash(textBoxPsswd.Text);
+            Properties.Settings.Default.port = textBoxPort.Text;
+
+            Properties.Settings.Default.UserID = textBoxUID.Text;               //Connexion DB
+            Properties.Settings.Default.Psswd = textBoxPW.Text;
+            Properties.Settings.Default.InitialCatalog = textBoxIC.Text;
+            Properties.Settings.Default.DataSource = textBoxDS.Text;
             try
             {
-                verif = Client.SendFrame(Dao.ChatConnec.Connection());
+                if (chatConnec.Connection())
+                {
+                    MessageBox.Show("Connecté au Chat");
+                    timer1.Enabled = true;
+                    buttonSender.Enabled = true;
+                    labelConnect.Text = "Etat Chat : Connecté";
+                    labelConnect.ForeColor = Color.Green;
+                    textBox1.Enabled = true;
+                    listBox1.Enabled = true;
+                    richTextBox1.Enabled = true;
+                    buttonDeco.Enabled = true;
+                }
+                else
+                    MessageBox.Show("Connexion impossible");
             }
-            catch (Exception ex)
+            catch (Exception _e)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Connexion au Chat impossible" + _e.Message);
             }
-            if (verif)
-            {
-                MessageBox.Show("Connecté au Chat");
-                timer1.Enabled = true;
-                buttonSender.Enabled = true;
-                labelConnect.Text = "Etat Chat : Connecté";
-                labelConnect.ForeColor = Color.Green;
-                textBox1.Enabled = true;
-                listBox1.Enabled = true;
-                richTextBox1.Enabled = true;
-                buttonDeco.Enabled = true;
-            }
-            else
-            {
-                MessageBox.Show("Connexion au Chat impossible");
-                labelConnect.Text = "Etat Chat : Déconnecté";
-                labelConnect.ForeColor = Color.Red;
-            }
+
             try
             {
-                db = new Dao.DBConnection("dlcdi_chat", "chatServer", @"CRM-UC-3628\SQLEXPRESS", "Cdi1234");
-                db.Open();
+                db = new DBConnection();
+                    db.Connect();
+                if (db.Connection.State == ConnectionState.Open)
+                    MessageBox.Show("Connexion à la base de données réussie");
+                else
+                    MessageBox.Show("La connexion à la base de données a échoué");
+                
+                
+      
             }
-            catch (Exception ex)
+            catch (Exception _e)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("La connexion à la base de données a échoué !" + _e.Message);
             }
         }
+
 
 
         private void timer1_Tick(object sender, EventArgs e)
         {
 
-            Dictionary<string, byte> _users = new Dictionary<string, byte>();
-            byte[] frame = Dao.ChatConnec.GetFrame();
-            if (frame != null)
+            if (Client.GetFrame(out byte[] messageRetour))
             {
-                if (FrameManager.GetFrameType(frame) == 10)
+                if (FrameManager.GetFrameType(messageRetour) == 10)
                 {
-                    FrameManager.UnwrapFrame10(frame, out moment, out time, out pseudo, out message);
-                    a = "[" + moment + " " + time + "]" + " " + pseudo;
-                    richTextBox1.SelectionColor = Color.Blue;
-                    richTextBox1.AppendText(a);
-                    richTextBox1.AppendText(" : " + message);
-                    richTextBox1.AppendText(Environment.NewLine);
+                    chatConnec.GetMessage(messageRetour, out moment, out time, out pseudo, out message);
+                    if (message != string.Empty)
+                    {
+                        richTextBox1.SelectionColor = Color.Black;
+                        richTextBox1.AppendText("[" + moment + " " + time + "]" + " " + pseudo);
+                        richTextBox1.AppendText(" : " + message);
+                        richTextBox1.AppendText(Environment.NewLine);
+                    }
                 }
-                else if (FrameManager.GetFrameType(frame) == 3)
+               else if (FrameManager.GetFrameType(messageRetour) == 3)
                 {
-                    FrameManager.UnwrapFrame3(frame, out _users);
                     listBox1.Items.Clear();
-                    foreach (KeyValuePair<string, byte> items in _users)
+                    foreach (KeyValuePair<string, byte> items in chatConnec.GetUsers(messageRetour))
                     {
                         if (!listBox1.Items.Contains(items.Key))
                             listBox1.Items.Add(items.Key);
                     }
+
                 }
             }
+            ShowStateChat();
+            ShowStateDB();
+
+        }
+
+        public void ShowStateChat()
+        {
+            if(Client.connectionState)
+            {
+                labelConnect.Text = "Etat Chat : Connecté";
+                labelConnect.ForeColor = Color.Green;
+            }
+            else
+            {
+                labelConnect.Text = "Etat Chat : Déconnecté";
+                labelConnect.ForeColor = Color.Red;
+            }
+        }
+        public void ShowStateDB()
+        {
             if (db.TestCon())
             {
                 label1.Text = "Etat DB : Connecté";
@@ -149,19 +173,7 @@ namespace Client_chat
                 label1.Text = "Etat DB : Déconnecté";
                 label1.ForeColor = Color.Red;
             }
-            if (Client.connectionState)
-            {
-                labelConnect.Text = "Etat Chat : Connecté";
-                labelConnect.ForeColor = Color.Green;
-            }
-            else
-            {
-                labelConnect.Text = "Etat Chat : Déconnecté";
-                labelConnect.ForeColor = Color.Red;
-            }
-
         }
-
 
     }
 }

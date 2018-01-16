@@ -8,12 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Client_chat.Dao;
+using System.Data.SqlClient;
+using System.Linq.Expressions;
 
 namespace Client_chat
 {
     public partial class DataBase : Form
     {
         DBConnection dBConnection;
+        SqlCommand command;
         public DataBase()
         {
             InitializeComponent();
@@ -31,7 +34,6 @@ namespace Client_chat
             //    dataGridDB.Rows.Add(userManager.Data[i].Login);
             //    dataGridDB.Rows.Add(userManager.Data[i].Email);
             //}
-            timer1.Enabled = true;
         }
 
         private void dataGridDB_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -41,20 +43,24 @@ namespace Client_chat
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-            User newUser = new User();
-            if (newUser.IsValide())
+            UserManager userManager = new UserManager();
+            DateTime date = Convert.ToDateTime(dateTimePicker1.Value);
+            if (userManager.AddUser(textBoxLog.Text, date, textBoxPass.Text, textBoxMail.Text))
             {
-                newUser.Login = textBoxLog.Text;
-                newUser.Passwd = textBoxPass.Text;
-                newUser.Email = textBoxMail.Text;
-                newUser.Birthday = Convert.ToDateTime(dateTimePicker1.Value);
-                UserManager userManager = new UserManager();
-                userManager.Data.Add(newUser);
+                MessageBox.Show("Ajout réussi !");
             }
             else
-                MessageBox.Show("Erreur de saisie");
+                MessageBox.Show("La tentative d'ajout n'a pas pu aboutir !");
             
         }
 
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            //command = new SqlCommand();
+            //SqlDataAdapter sqlDataAdapter = new SqlDataAdapter();
+            //DataSet dataSet = new DataSet();
+            //sqlDataAdapter.Fill(dataSet);
+            //dataGridDB.Rows.Add(dataReader);
+        }
     }
 }
